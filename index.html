@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ITパスポート・クエスト 極</title>
+    <style>
+        :root {
+            --primary: #2c3e50; --accent: #e67e22; --success: #27ae60;
+            --bg: #f0f3f5; --card: #ffffff;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg); margin: 0; padding-bottom: 70px; color: #333;
+        }
+        /* ヘッダー・ステータス */
+        .header {
+            background: var(--primary); color: white; padding: 15px;
+            position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px; }
+        .kp-badge { background: var(--accent); padding: 4px 10px; border-radius: 15px; font-weight: bold; }
+
+        /* メインコンテンツ */
+        .container { max-width: 500px; margin: auto; padding: 15px; }
+        .card {
+            background: var(--card); border-radius: 15px; padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px;
+        }
+
+        /* クイズ画面 */
+        .q-meta { font-size: 12px; color: #7f8c8d; margin-bottom: 10px; }
+        .q-text { font-size: 18px; font-weight: bold; line-height: 1.5; margin-bottom: 20px; }
+        .option {
+            background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 10px;
+            padding: 15px; margin-bottom: 12px; cursor: pointer; transition: 0.2s;
+            font-size: 16px; display: flex; align-items: center;
+        }
+        .option:active { background: #e9ecef; transform: scale(0.98); }
+        
+        /* ボトムナビゲーション */
+        .nav {
+            position: fixed; bottom: 0; width: 100%; background: white;
+            display: flex; border-top: 1px solid #ddd; height: 65px;
+        }
+        .nav-item {
+            flex: 1; display: flex; flex-direction: column; align-items: center;
+            justify-content: center; font-size: 12px; color: #7f8c8d; cursor: pointer;
+        }
+        .nav-item.active { color: var(--accent); font-weight: bold; }
+
+        /* プログレスバー */
+        .progress-container { margin: 10px 0; }
+        .bar-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+        .bar-bg { background: #eee; height: 8px; border-radius: 4px; overflow: hidden; }
+        .bar-fill { height: 100%; background: var(--success); width: 0%; transition: 0.5s; }
+
+        button.primary {
+            background: var(--accent); color: white; border: none; padding: 15px;
+            border-radius: 10px; font-size: 18px; font-weight: bold; width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="status-grid">
+        <div>称号: <span id="rank">IT初学者</span></div>
+        <div style="text-align:right;">KP: <span id="kp" class="kp-badge">0</span></div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- クエスト画面 -->
+    <div id="view-quest" class="view active">
+        <div id="quest-home">
+            <div class="card">
+                <h2>過去問クエスト</h2>
+                <p>全10,000問のデータベースからCBT方式に基づきランダムに10問出題します。</p>
+                <button class="primary" onclick="startQuest()">クエスト開始</button>
+            </div>
+        </div>
+
+        <div id="quest-play" style="display:none;">
+            <div class="card">
+                <div class="q-meta"><span id="q-category">テクノロジ系</span> | 第 <span id="q-idx">1</span> 問</div>
+                <div id="q-text" class="q-text">問題文を読み込んでいます...</div>
+                <div id="options"></div>
+            </div>
+        </div>
+
+        <div id="quest-result" style="display:none;">
+            <div class="card" style="text-align:center;">
+                <h2>リザルト</h2>
+                <div style="font-size: 40px; margin: 20px 0;"><span id="res-score">0</span> / 10</div>
+                <p>獲得知力ポイント: <span id="res-kp">0</span> KP</p>
+                <button class="primary" onclick="resetQuest()">ホームに戻る</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 分析画面 -->
+    <div id="view-status" class="view" style="display:none;">
+        <div class="card">
+            <h3>分野別熟練度</h3>
+            <div class="progress-container">
+                <div class="bar-label"><span>ストラテジ系（経営）</span><span id="txt-s">0</span></div>
+                <div class="bar-bg"><div id="bar-s" class="bar-fill"></div></div>
+            </div>
+            <div class="progress-container">
+                <div class="bar-label"><span>マネジメント系（管理）</span><span id="txt-m">0</span></div>
+                <div class="bar-bg"><div id="bar-m" class="bar-fill"></div></div>
+            </div>
+            <div class="progress-container">
+                <div class="bar-label"><span>テクノロジ系（技術）</span><span id="txt-t">0</span></div>
+                <div class="bar-bg"><div id="bar-t" class="bar-fill"></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<nav class="nav">
+    <div class="nav-item active" onclick="switchView('quest', this)"><span>クエスト</span></div>
+    <div class="nav-item" onclick="switchView('status', this)"><span>分析</span></div>
+</nav>
+
+<script>
+    // セーブデータ管理
+    let save = JSON.parse(localStorage.getItem('itp_quest_save')) || {
+        kp: 0, stats: { s: 0, m: 0, t: 0 }, total: 0
+    };
+
+    let questions = [];
+    let session = [];
+    let currentIdx = 0;
+    let score = 0;
+
+    // 10,000問のJSON読み込み（実際には外部ファイルから）
+    async function init() {
+        try {
+            const res = await fetch('questions.json');
+            questions = await res.json();
+            updateUI();
+        } catch (e) {
+            console.error("10,000問データの読み込みに失敗しました。");
+        }
+    }
+
+    function startQuest() {
+        if (questions.length === 0) return alert("データ読み込み中...");
+        // 10,000問から10問をランダム抽出
+        session = [...questions].sort(() => 0.5 - Math.random()).slice(0, 10);
+        currentIdx = 0; score = 0;
+        document.getElementById('quest-home').style.display = 'none';
+        document.getElementById('quest-play').style.display = 'block';
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const q = session[currentIdx];
+        document.getElementById('q-idx').innerText = currentIdx + 1;
+        document.getElementById('q-category').innerText = getCatName(q.cat);
+        document.getElementById('q-text').innerText = q.q;
+        
+        let html = "";
+        q.o.forEach((opt, i) => {
+            html += `<div class="option" onclick="handleAnswer(${i})">${i+1}. ${opt}</div>`;
+        });
+        document.getElementById('options').innerHTML = html;
+    }
+
+    function handleAnswer(idx) {
+        if (idx === session[currentIdx].a) {
+            score++;
+            save.stats[session[currentIdx].cat]++;
+        }
+        currentIdx++;
+        if (currentIdx < 10) showQuestion(); else finishQuest();
+    }
+
+    function finishQuest() {
+        const gain = score * 50;
+        save.kp += gain;
+        save.total += score;
+        localStorage.setItem('itp_quest_save', JSON.stringify(save));
+        
+        document.getElementById('quest-play').style.display = 'none';
+        document.getElementById('quest-result').style.display = 'block';
+        document.getElementById('res-score').innerText = score;
+        document.getElementById('res-kp').innerText = gain;
+        updateUI();
+    }
+
+    function updateUI() {
+        document.getElementById('kp').innerText = save.kp.toLocaleString();
+        document.getElementById('bar-s').style.width = Math.min(100, save.stats.s) + '%';
+        document.getElementById('bar-m').style.width = Math.min(100, save.stats.m) + '%';
+        document.getElementById('bar-t').style.width = Math.min(100, save.stats.t) + '%';
+        document.getElementById('txt-s').innerText = save.stats.s;
+        document.getElementById('txt-m').innerText = save.stats.m;
+        document.getElementById('txt-t').innerText = save.stats.t;
+        
+        const ranks = ["IT初学者", "ITアドバイザー", "ITパスポート保持者", "ITマスター"];
+        document.getElementById('rank').innerText = ranks[Math.min(3, Math.floor(save.total / 100))];
+    }
+
+    function switchView(id, el) {
+        document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
+        document.getElementById('view-' + id).style.display = 'block';
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    function resetQuest() {
+        document.getElementById('quest-result').style.display = 'none';
+        document.getElementById('quest-home').style.display = 'block';
+    }
+
+    function getCatName(c) {
+        return c === 's' ? 'ストラテジ系' : c === 'm' ? 'マネジメント系' : 'テクノロジ系';
+    }
+
+    init();
+</script>
+</body>
+</html>
