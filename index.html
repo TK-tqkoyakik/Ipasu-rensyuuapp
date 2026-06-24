@@ -3,225 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ITパスポート・クエスト 極</title>
+    <title>ITパスポート・クエスト 極+Gacha</title>
     <style>
-        :root {
-            --primary: #2c3e50; --accent: #e67e22; --success: #27ae60;
-            --bg: #f0f3f5; --card: #ffffff;
-        }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg); margin: 0; padding-bottom: 70px; color: #333;
-        }
-        /* ヘッダー・ステータス */
-        .header {
-            background: var(--primary); color: white; padding: 15px;
-            position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px; }
-        .kp-badge { background: var(--accent); padding: 4px 10px; border-radius: 15px; font-weight: bold; }
-
-        /* メインコンテンツ */
+        :root { --primary: #2c3e50; --accent: #e67e22; --bg: #f4f7f6; --card: #ffffff; --rare: #3498db; --ur: #9b59b6; --legend: #f1c40f; }
+        body { font-family: sans-serif; background: var(--bg); margin: 0; padding-bottom: 80px; }
+        .header { background: var(--primary); color: white; padding: 12px; position: sticky; top: 0; display: flex; justify-content: space-between; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .container { max-width: 500px; margin: auto; padding: 15px; }
-        .card {
-            background: var(--card); border-radius: 15px; padding: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px;
-        }
-
-        /* クイズ画面 */
-        .q-meta { font-size: 12px; color: #7f8c8d; margin-bottom: 10px; }
-        .q-text { font-size: 18px; font-weight: bold; line-height: 1.5; margin-bottom: 20px; }
-        .option {
-            background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 10px;
-            padding: 15px; margin-bottom: 12px; cursor: pointer; transition: 0.2s;
-            font-size: 16px; display: flex; align-items: center;
-        }
-        .option:active { background: #e9ecef; transform: scale(0.98); }
-        
-        /* ボトムナビゲーション */
-        .nav {
-            position: fixed; bottom: 0; width: 100%; background: white;
-            display: flex; border-top: 1px solid #ddd; height: 65px;
-        }
-        .nav-item {
-            flex: 1; display: flex; flex-direction: column; align-items: center;
-            justify-content: center; font-size: 12px; color: #7f8c8d; cursor: pointer;
-        }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        .option { background: #f8f9fa; border: 2px solid #ddd; border-radius: 8px; padding: 12px; margin: 8px 0; cursor: pointer; transition: 0.2s; }
+        .option:active { transform: scale(0.98); }
+        .nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 70px; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; cursor: pointer; color: #7f8c8d; }
         .nav-item.active { color: var(--accent); font-weight: bold; }
-
-        /* プログレスバー */
-        .progress-container { margin: 10px 0; }
-        .bar-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
-        .bar-bg { background: #eee; height: 8px; border-radius: 4px; overflow: hidden; }
-        .bar-fill { height: 100%; background: var(--success); width: 0%; transition: 0.5s; }
-
-        button.primary {
-            background: var(--accent); color: white; border: none; padding: 15px;
-            border-radius: 10px; font-size: 18px; font-weight: bold; width: 100%;
-        }
+        .main-btn { background: var(--accent); color: white; border: none; padding: 15px; border-radius: 10px; width: 100%; font-size: 16px; font-weight: bold; cursor: pointer; }
+        
+        /* ガチャ・コレクション用 */
+        .rarity-L { color: var(--legend); text-shadow: 0 0 5px orange; font-weight: bold; }
+        .rarity-UR { color: var(--ur); font-weight: bold; }
+        .rarity-SR { color: #e74c3c; font-weight: bold; }
+        .item-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+        .item-slot { width: 100%; aspect-ratio: 1; background: #eee; border-radius: 5px; font-size: 8px; display: flex; align-items: center; justify-content: center; text-align: center; border: 1px solid #ccc; color: #aaa; }
+        .item-slot.owned { background: white; color: #333; border-color: var(--accent); }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <div class="status-grid">
-        <div>称号: <span id="rank">IT初学者</span></div>
-        <div style="text-align:right;">KP: <span id="kp" class="kp-badge">0</span></div>
-    </div>
+    <div>Lv.<span id="lv">1</span> <span id="rank">IT初学者</span></div>
+    <div><span id="kp" style="background:var(--accent); padding:2px 8px; border-radius:10px;">0</span> KP</div>
 </div>
 
-<div class="container">
-    <!-- クエスト画面 -->
-    <div id="view-quest" class="view active">
-        <div id="quest-home">
-            <div class="card">
-                <h2>過去問クエスト</h2>
-                <p>全10,000問のデータベースからCBT方式に基づきランダムに10問出題します。</p>
-                <button class="primary" onclick="startQuest()">クエスト開始</button>
-            </div>
-        </div>
-
-        <div id="quest-play" style="display:none;">
-            <div class="card">
-                <div class="q-meta"><span id="q-category">テクノロジ系</span> | 第 <span id="q-idx">1</span> 問</div>
-                <div id="q-text" class="q-text">問題文を読み込んでいます...</div>
-                <div id="options"></div>
-            </div>
-        </div>
-
-        <div id="quest-result" style="display:none;">
-            <div class="card" style="text-align:center;">
-                <h2>リザルト</h2>
-                <div style="font-size: 40px; margin: 20px 0;"><span id="res-score">0</span> / 10</div>
-                <p>獲得知力ポイント: <span id="res-kp">0</span> KP</p>
-                <button class="primary" onclick="resetQuest()">ホームに戻る</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 分析画面 -->
-    <div id="view-status" class="view" style="display:none;">
-        <div class="card">
-            <h3>分野別熟練度</h3>
-            <div class="progress-container">
-                <div class="bar-label"><span>ストラテジ系（経営）</span><span id="txt-s">0</span></div>
-                <div class="bar-bg"><div id="bar-s" class="bar-fill"></div></div>
-            </div>
-            <div class="progress-container">
-                <div class="bar-label"><span>マネジメント系（管理）</span><span id="txt-m">0</span></div>
-                <div class="bar-bg"><div id="bar-m" class="bar-fill"></div></div>
-            </div>
-            <div class="progress-container">
-                <div class="bar-label"><span>テクノロジ系（技術）</span><span id="txt-t">0</span></div>
-                <div class="bar-bg"><div id="bar-t" class="bar-fill"></div></div>
-            </div>
-        </div>
-    </div>
-</div>
+<div class="container" id="main-content"></div>
 
 <nav class="nav">
-    <div class="nav-item active" onclick="switchView('quest', this)"><span>クエスト</span></div>
-    <div class="nav-item" onclick="switchView('status', this)"><span>分析</span></div>
+    <div class="nav-item active" id="nav-quest" onclick="changeTab('quest')"><span>クエスト</span></div>
+    <div class="nav-item" id="nav-gacha" onclick="changeTab('gacha')"><span>ガチャ</span></div>
+    <div class="nav-item" id="nav-collection" onclick="changeTab('collection')"><span>図鑑</span></div>
+    <div class="nav-item" id="nav-status" onclick="changeTab('status')"><span>分析</span></div>
 </nav>
 
 <script>
-    // セーブデータ管理
-    let save = JSON.parse(localStorage.getItem('itp_quest_save')) || {
-        kp: 0, stats: { s: 0, m: 0, t: 0 }, total: 0
+    // アイテムデータ100個生成
+    const masterItems = [];
+    const rarities = [
+        { grade: 'L', prob: 1, color: '#f1c40f', names: ["iパスの神の証", "量子コンピュータ", "人工知能の心臓"] },
+        { grade: 'UR', prob: 4, color: '#9b59b6', names: ["スパコン京", "ブロックチェーンの鍵", "暗号化の極意"] },
+        { grade: 'SR', prob: 8, color: '#e74c3c', names: ["光ファイバー", "高性能サーバー", "ファイアウォール"] },
+        { grade: 'R', prob: 12, color: '#3498db', names: ["SSD 2TB", "ゲーミングマウス", "4Kモニター"] },
+        { grade: 'U', prob: 25, color: '#2ecc71', names: ["無線ルーター", "USBメモリ", "冷却ファン"] },
+        { grade: 'C', prob: 50, color: '#95a5a6', names: ["LANケーブル", "マウスパッド", "キーボード"] }
+    ];
+
+    for(let i=0; i<100; i++) {
+        let r = i < 3 ? rarities : i < 8 ? rarities[1] : i < 20 ? rarities[2] : i < 40 ? rarities[3] : i < 70 ? rarities : rarities;
+        masterItems.push({ id: i, name: r.names[i % r.names.length] + (Math.floor(i/10) || ""), rarity: r.grade });
+    }
+
+    let db = [];
+    let save = JSON.parse(localStorage.getItem('itp_mega_save')) || {
+        kp: 0, totalCorrect: 0, stats: { s: 0, m: 0, t: 0 }, inventory: []
     };
 
-    let questions = [];
-    let session = [];
-    let currentIdx = 0;
-    let score = 0;
-
-    // 10,000問のJSON読み込み（実際には外部ファイルから）
-    async function init() {
+    async function loadData() {
         try {
             const res = await fetch('questions.json');
-            questions = await res.json();
-            updateUI();
-        } catch (e) {
-            console.error("10,000問データの読み込みに失敗しました。");
+            db = await res.json();
+        } catch(e) { 
+            db = [{q:"テスト問題", o:["A","B","C","D"], a:0, cat:"t"}]; // フォールバック
+        }
+        changeTab('quest');
+    }
+
+    function saveGame() {
+        localStorage.setItem('itp_mega_save', JSON.stringify(save));
+        updateHeader();
+    }
+
+    function updateHeader() {
+        document.getElementById('kp').innerText = save.kp.toLocaleString();
+        document.getElementById('lv').innerText = Math.floor(save.totalCorrect / 10) + 1;
+        const titles = ["初学者", "見習い", "実務者", "管理者", "マスター", "iパスの神"];
+        document.getElementById('rank').innerText = titles[Math.min(5, Math.floor(save.totalCorrect / 50))];
+    }
+
+    function changeTab(tab) {
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById('nav-' + tab).classList.add('active');
+        const cont = document.getElementById('main-content');
+
+        if(tab === 'quest') {
+            cont.innerHTML = `<div class="card"><h2>10問クエスト</h2><p>ITパスポート試験の全範囲から出題されます。</p><button class="main-btn" onclick="startQuest()">挑戦する</button></div>`;
+        } else if(tab === 'gacha') {
+            cont.innerHTML = `<div class="card" style="text-align:center;"><h2>ITガチャ</h2><p>1回 100 KP</p><div id="g-res" style="height:100px; display:flex; align-items:center; justify-content:center; font-size:24px;">???</div><button class="main-btn" onclick="rollGacha()">100KPで回す</button></div>`;
+        } else if(tab === 'collection') {
+            cont.innerHTML = `<div class="card"><h3>コレクション (${save.inventory.length}/100)</h3><div class="item-grid">${masterItems.map(it => `<div class="item-slot ${save.inventory.includes(it.id)?'owned':''}"> ${save.inventory.includes(it.id)?it.name:it.id+1}</div>`).join('')}</div></div>`;
+        } else if(tab === 'status') {
+            cont.innerHTML = `<div class="card"><h3>習得ステータス</h3>${['s','m','t'].map(c => `<p>${c==='s'?'ストラテジ':c==='m'?'マネジメント':'テクノロジ'}系</p><div style="background:#eee; height:10px; border-radius:5px;"><div style="width:${Math.min(100, save.stats[c])}%; background:var(--accent); height:100%; border-radius:5px;"></div></div>`).join('')}</div>`;
         }
     }
 
     function startQuest() {
-        if (questions.length === 0) return alert("データ読み込み中...");
-        // 10,000問から10問をランダム抽出
-        session = [...questions].sort(() => 0.5 - Math.random()).slice(0, 10);
-        currentIdx = 0; score = 0;
-        document.getElementById('quest-home').style.display = 'none';
-        document.getElementById('quest-play').style.display = 'block';
-        showQuestion();
-    }
-
-    function showQuestion() {
-        const q = session[currentIdx];
-        document.getElementById('q-idx').innerText = currentIdx + 1;
-        document.getElementById('q-category').innerText = getCatName(q.cat);
-        document.getElementById('q-text').innerText = q.q;
+        let session = [...db].sort(() => 0.5 - Math.random()).slice(0, 10);
+        let idx = 0, correctCount = 0;
         
-        let html = "";
-        q.o.forEach((opt, i) => {
-            html += `<div class="option" onclick="handleAnswer(${i})">${i+1}. ${opt}</div>`;
-        });
-        document.getElementById('options').innerHTML = html;
+        const showQ = () => {
+            let q = session[idx];
+            document.getElementById('main-content').innerHTML = `
+                <div class="card">
+                    <small>${q.cat.toUpperCase()}分野 | 第 ${idx+1}/10 問</small>
+                    <p style="font-size:18px; font-weight:bold;">${q.q}</p>
+                    <div id="opts">
+                        ${q.o.map((o,i) => `<div class="option" onclick="check(${i},${q.a},'${q.cat}')">${o}</div>`).join('')}
+                    </div>
+                    <div id="feedback" style="display:none; margin-top:15px; padding:10px; border-radius:8px; font-weight:bold;"></div>
+                    <button id="next-btn" class="main-btn" style="display:none; margin-top:15px;" onclick="next()">次へ</button>
+                </div>`;
+        };
+
+        window.check = (i, a, cat) => {
+            const fd = document.getElementById('feedback');
+            fd.style.display = 'block';
+            document.querySelectorAll('.option').forEach(el => el.style.pointerEvents = 'none');
+            if(i === a) {
+                correctCount++; save.stats[cat]++;
+                fd.innerText = "✓ 正解！"; fd.style.background = "#eaffea"; fd.style.color = "green";
+            } else {
+                fd.innerText = `× 不正解... (正解は: ${session[idx].o[a]})`;
+                fd.style.background = "#ffeaea"; fd.style.color = "red";
+            }
+            document.getElementById('next-btn').style.display = 'block';
+        };
+
+        window.next = () => {
+            idx++;
+            if(idx < 10) showQ();
+            else {
+                let gain = correctCount * 20; save.kp += gain; save.totalCorrect += correctCount;
+                saveGame();
+                document.getElementById('main-content').innerHTML = `<div class="card" style="text-align:center;"><h2>結果</h2><p style="font-size:32px;">${correctCount}/10</p><p>獲得ポイント: ${gain} KP</p><button class="main-btn" onclick="changeTab('quest')">ホームへ</button></div>`;
+            }
+        };
+        showQ();
     }
 
-    function handleAnswer(idx) {
-        if (idx === session[currentIdx].a) {
-            score++;
-            save.stats[session[currentIdx].cat]++;
-        }
-        currentIdx++;
-        if (currentIdx < 10) showQuestion(); else finishQuest();
-    }
+    function rollGacha() {
+        if(save.kp < 100) return alert("KPが足りません！クエストで問題を解いてください。");
+        save.kp -= 100;
+        let r = Math.random() * 100;
+        let grade = 'C';
+        if(r < 1) grade = 'L';
+        else if(r < 5) grade = 'UR';
+        else if(r < 13) grade = 'SR';
+        else if(r < 25) grade = 'R';
+        else if(r < 50) grade = 'U';
 
-    function finishQuest() {
-        const gain = score * 50;
-        save.kp += gain;
-        save.total += score;
-        localStorage.setItem('itp_quest_save', JSON.stringify(save));
+        let pool = masterItems.filter(it => it.rarity === grade);
+        let got = pool[Math.floor(Math.random() * pool.length)];
         
-        document.getElementById('quest-play').style.display = 'none';
-        document.getElementById('quest-result').style.display = 'block';
-        document.getElementById('res-score').innerText = score;
-        document.getElementById('res-kp').innerText = gain;
-        updateUI();
-    }
-
-    function updateUI() {
-        document.getElementById('kp').innerText = save.kp.toLocaleString();
-        document.getElementById('bar-s').style.width = Math.min(100, save.stats.s) + '%';
-        document.getElementById('bar-m').style.width = Math.min(100, save.stats.m) + '%';
-        document.getElementById('bar-t').style.width = Math.min(100, save.stats.t) + '%';
-        document.getElementById('txt-s').innerText = save.stats.s;
-        document.getElementById('txt-m').innerText = save.stats.m;
-        document.getElementById('txt-t').innerText = save.stats.t;
+        if(!save.inventory.includes(got.id)) save.inventory.push(got.id);
         
-        const ranks = ["IT初学者", "ITアドバイザー", "ITパスポート保持者", "ITマスター"];
-        document.getElementById('rank').innerText = ranks[Math.min(3, Math.floor(save.total / 100))];
+        const resDiv = document.getElementById('g-res');
+        resDiv.innerHTML = `<span class="rarity-${grade}">${grade}: ${got.name}</span>`;
+        saveGame();
     }
 
-    function switchView(id, el) {
-        document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
-        document.getElementById('view-' + id).style.display = 'block';
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        el.classList.add('active');
-    }
-
-    function resetQuest() {
-        document.getElementById('quest-result').style.display = 'none';
-        document.getElementById('quest-home').style.display = 'block';
-    }
-
-    function getCatName(c) {
-        return c === 's' ? 'ストラテジ系' : c === 'm' ? 'マネジメント系' : 'テクノロジ系';
-    }
-
-    init();
+    loadData();
+    updateHeader();
 </script>
 </body>
 </html>
